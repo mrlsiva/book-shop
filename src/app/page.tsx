@@ -1,69 +1,79 @@
-import Image from "next/image";
+"use client";
+
+import { useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useStore } from "@/context/store-context";
+import { BookCard, EmptyState, Notice } from "@/components/storefront";
+import type { Category } from "@/lib/types";
 
 export default function Home() {
+  const { categories, products, catalogQuery, catalogLoading, catalogLoadingMore, catalogHasMore, catalogError, loadCatalog, loadMoreCatalog } = useStore();
+  const [search, setSearch] = useState(catalogQuery.search);
+  const activeCategory = catalogQuery.category;
+
+  function onSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void loadCatalog({ search: search.trim() });
+  }
+
+  function chooseCategory(category: Category | null) {
+    setSearch("");
+    void loadCatalog({ category });
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main>
+      <section className="hero-band">
+        <div className="hero-copy">
+          <p className="eyebrow">A little more wonder, one page at a time</p>
+          <h1>Stories worth<br />staying up for.</h1>
+          <p className="hero-description">Find your next favourite among thoughtful reads, fresh voices, and well-loved classics.</p>
+          <a className="button button-dark" href="#shelf">Browse the shelves <span aria-hidden="true">↘</span></a>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div className="hero-art" aria-label="A stack of books from the bookstore">
+          <div className="hero-note">THE<br />GOOD<br />PAGES</div>
+          <div className="book-stack">
+            <div className="hero-book book-one"><span>THE ART<br />OF NOTICING</span><small>FIELD NOTES · 01</small></div>
+            <div className="hero-book book-two"><span>WILD<br />PLACES</span><small>A NOVEL BY E. HART</small></div>
+            <div className="hero-book book-three"><span>THE<br />LONG WAY<br />HOME</span><small>NEW EDITION</small></div>
+          </div>
+          <div className="hero-stamp">READ<br />MORE</div>
         </div>
-      </main>
-    </div>
+        <div className="hero-bottom"><span>CURATED FOR THE CURIOUS</span><span>EST. 2024 · OPEN EVERY DAY</span></div>
+      </section>
+
+      <section className="catalog-section" id="shelf">
+        <div className="section-heading">
+          <div><p className="eyebrow">Your next chapter</p><h2>Browse the shelves</h2></div>
+          <form className="search-form" onSubmit={onSearch}>
+            <label className="sr-only" htmlFor="book-search">Search books</label>
+            <input id="book-search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Title or category" />
+            <button type="submit" aria-label="Search books">Search <span aria-hidden="true">↗</span></button>
+          </form>
+        </div>
+
+        <nav className="category-list" aria-label="Book categories">
+          <button className={!activeCategory ? "category-chip active" : "category-chip"} aria-pressed={!activeCategory} onClick={() => chooseCategory(null)}>All books</button>
+          {categories.map((category) => (
+            <button key={category.id} className={activeCategory?.id === category.id ? "category-chip active" : "category-chip"} aria-pressed={activeCategory?.id === category.id} onClick={() => chooseCategory(category)}>{category.name}</button>
+          ))}
+        </nav>
+
+        {catalogQuery.search && !catalogLoading && <p className="muted">Showing results for “{catalogQuery.search}”. <button className="text-button" onClick={() => chooseCategory(null)}>Clear search</button></p>}
+
+        {catalogError && !products.length ? <Notice tone="error" message={catalogError} action={<button className="text-button" onClick={() => void loadCatalog(catalogQuery)}>Try again</button>} /> : catalogLoading ? <p className="loading-line">Opening the shelves…</p> : products.length ? (
+          <div className="book-grid">{products.map((stock, index) => <BookCard key={stock.product.id} stock={stock} index={index} />)}</div>
+        ) : <EmptyState title="The shelves are quiet" description={catalogQuery.search ? "No books matched that search. Try another title or category." : activeCategory ? "Nothing in this category is in stock right now." : "There are no books to show just yet. Check back soon."} />}
+        {catalogError && products.length > 0 && <Notice tone="error" message={catalogError} />}
+        {!catalogLoading && catalogHasMore && <div style={{ display: "flex", justifyContent: "center", marginTop: 32 }}><button className="button button-outline" disabled={catalogLoadingMore} onClick={() => void loadMoreCatalog()}>{catalogLoadingMore ? "Loading…" : "Show more books"}</button></div>}
+        <div className="catalog-footer"><span>{products.length} {products.length === 1 ? "book" : "books"} in view</span><Link href="/orders">Track an order <span aria-hidden="true">↗</span></Link></div>
+      </section>
+
+      <section className="reading-note">
+        <div className="reading-mark">“</div>
+        <p>There is no friend as loyal as a book.</p>
+        <span>ERNEST HEMINGWAY</span>
+      </section>
+    </main>
   );
 }
