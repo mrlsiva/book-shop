@@ -6,7 +6,8 @@ import { useParams } from "next/navigation";
 import { useStore } from "@/context/store-context";
 import { defaultVariation, findStock, formatPrice, selectableVariations, unitTax, variationLabel } from "@/lib/api";
 import type { StockItem } from "@/lib/types";
-import { BookArt, EmptyState, LoadingPage, Notice, PriceTag } from "@/components/storefront";
+import { EmptyState, LoadingPage, Notice, PriceTag } from "@/components/storefront";
+import { ProductGallery } from "@/components/product-gallery";
 
 function ProductDetailContent() {
   const { id } = useParams<{ id: string }>();
@@ -56,7 +57,7 @@ function ProductDetailContent() {
     <main className="page-wrap">
       <p className="muted" style={{ marginBottom: 20 }}><Link className="inline-link" href="/#shelf">← Back to the shelves</Link></p>
       <div className="product-detail">
-        <BookArt stock={stock} large />
+        <ProductGallery key={product.id} stock={stock} />
         <section className="product-detail-copy">
           <p className="eyebrow">{[product.category?.name, product.sub_category?.name].filter(Boolean).join(" · ") || "On the shelf"}</p>
           <h1>{product.name}</h1>

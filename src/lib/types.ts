@@ -44,7 +44,10 @@ export type Product = {
   discounted_price?: Numeric | null;
   /** Per-unit GST already contained in `price`. */
   tax_amount?: Numeric | null;
+  /** Primary photo, or the API's placeholder icon URL when none is uploaded. */
   image?: string | null;
+  /** Extra gallery photo URLs (at most 5); often empty. */
+  images?: string[] | null;
   hsn_code?: string | null;
   category?: Category | null;
   sub_category?: Category | null;

@@ -108,6 +108,16 @@ export function isPlaceholderImage(src?: string | null) {
   return !src || /no-image-icon\.svg$/i.test(src);
 }
 
+/** The API caps a product's gallery at this many photos. */
+export const MAX_GALLERY_PHOTOS = 5;
+
+/** Primary photo first, then gallery photos; placeholders and duplicates removed. */
+export function productPhotos(product: Product) {
+  const gallery = Array.isArray(product.images) ? product.images.slice(0, MAX_GALLERY_PHOTOS) : [];
+  const all = [product.image, ...gallery].filter((src): src is string => typeof src === "string" && !isPlaceholderImage(src));
+  return [...new Set(all)];
+}
+
 function attributeName(value: VariantAttribute | undefined) {
   if (!value) return "";
   return typeof value === "string" ? value : value.name ?? "";
